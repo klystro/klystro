@@ -1,6 +1,6 @@
 # Klystro
 
-Welcome to Klystro! This is a modular, scalable, and maintainable backend service built in Go, designed to handle user and post functionalities, as well as integrate with various services like MongoDB, Redis, RabbitMQ, and Firebase.
+Welcome to Klystro! This is a modular, scalable, and maintainable backend service built in Go, designed to handle user and post functionalities, as well as integrate with various services like MongoDB, Redis, RabbitMQ, and Firebase. This framework supports HTTP/1, HTTP/2, and HTTP/3.
 
 ## Table of Contents
 
@@ -26,81 +26,15 @@ Welcome to Klystro! This is a modular, scalable, and maintainable backend servic
   - Firebase for authentication and notifications
 - Built-in HTTP client utilities and interceptors
 - Comprehensive testing framework
+- Supports HTTP/1, HTTP/2, and HTTP/3
 
 ## Directory Structure
 
 ```
 /klystro
-├── cmd                          # Entry points for the application
-│   ├── klystro                  # Main application
-│   │   └── main.go              # Entry point for the REST service
-│   ├── migrate                  # Migration utility
-│   │   └── main.go              # Entry point for running migrations
-│   └── seed                     # Seeding utility
-│       └── main.go              # Entry point for seeding the database
-├── config                       # Configuration settings
-│   └── config.go                # Configuration management
-├── docs                         # Documentation files
-├── internal                     # Internal packages
-│   ├── middleware               # Middleware for handling requests
-│   │   ├── auth.go              # Authentication middleware
-│   │   └── logging.go           # Logging middleware
-│   ├── enums                    # Enum definitions
-│   │   └── enums.go             # Enum management
-│   ├── exceptions               # Custom error handling
-│   │   └── exceptions.go        # Exception management
-│   ├── guards                   # Guards for route protection
-│   │   └── guards.go            # Route guard management
-├── pkg                          # External packages
-│   ├── db                       # Database connection logic
-│   │   └── db.go                # MongoDB connection
-│   ├── redis                    # Redis connection logic
-│   │   └── redis.go             # Redis connection management
-│   ├── rabbitmq                 # RabbitMQ connection logic
-│   │   └── rabbitmq.go          # RabbitMQ connection management
-│   ├── firebase                 # Firebase integration logic
-│   │   └── firebase.go          # Firebase integration management
-│   ├── httpclient               # HTTP client utilities
-│   │   └── http_client.go       # HTTP client management
-│   ├── interceptors             # HTTP interceptors
-│   │   └── interceptors.go      # Interceptor management
-│   ├── pubnub                   # PubNub integration logic
-│   │   └── pubnub.go            # PubNub integration management
-├── modules                      # Business logic modules
-│   ├── users                    # User-related functionalities
-│   │   ├── v1                   # Version 1 of the user module
-│   │   │   ├── controller       # User controller
-│   │   │   │   └── user_controller.go  # Handles user requests
-│   │   │   ├── model            # User model
-│   │   │   │   └── user.go      # User data structure
-│   │   │   ├── repository       # User repository
-│   │   │   │   └── user_repository.go # User data access logic
-│   │   │   ├── service          # User service
-│   │   │   │   └── user_service.go     # User business logic
-│   │   │   ├── routes           # User routes
-│   │   │   │   └── user_routes.go      # User route definitions
-│   │   │   └── request          # User request data validation
-│   │   │       └── user_request.go     # User request struct
-│   ├── posts                    # Post-related functionalities
-│   │   ├── v1                   # Version 1 of the post module
-│   │   │   └── ...              # Implementation for posts
-├── deployments                  # Deployment configurations
-│   ├── k8s                      # Kubernetes configurations
-│   │   ├── deployment.yaml      # Kubernetes deployment file
-│   │   ├── service.yaml         # Kubernetes service file
-│   │   └── ingress.yaml         # Ingress configurations
-│   └── docker                   # Docker configurations
-│       └── Dockerfile           # Dockerfile for building the service
-├── tests                        # Test files
-│   ├── users                    # User tests
-│   │   ├── user_test.go         # Unit tests for user functionalities
-│   └── test_helpers.go          # Helper functions for testing
-├── go.mod                       # Go module file
-└── go.sum                       # Go module dependencies
-```
-
-<!-- /klystro
+├── cert.pem
 ├── cmd
+│   ├── build-errors.log
 │   ├── klystro
 │   │   └── main.go
 │   ├── migrate
@@ -109,33 +43,40 @@ Welcome to Klystro! This is a modular, scalable, and maintainable backend servic
 │       └── main.go
 ├── config
 │   └── config.go
+├── deployments
+│   ├── docker
+│   │   └── Dockerfile
+│   └── k8s
+│       ├── deployment.yaml
+│       ├── ingress.yaml
+│       └── service.yaml
 ├── docs
+├── go.mod
+├── go.sum
 ├── internal
-│   ├── middleware
-│   │   ├── auth.go
-│   │   └── logging.go
 │   ├── enums
 │   │   └── enums.go
 │   ├── exceptions
 │   │   └── exceptions.go
 │   ├── guards
 │   │   └── guards.go
+│   └── middleware
+│       ├── auth.go
+│       └── logging.go
+├── key.pem
 ├── pkg
 │   ├── db
+│   │   ├── db.go
+│   │   ├── influxdb
+│   │   │   └── influx.go
 │   │   ├── mongodb
-│   │   │   └── mongodb.go
+│   │   │   └── mongo.go
 │   │   ├── mysql
 │   │   │   └── mysql.go
-│   │   ├── postgres
-│   │   │   └── postgres.go
-│   │   ├── oracledb
-│   │   │   └── oracledb.go
-│   │   └── influxdb
-│   │       └── influxdb.go
-│   ├── redis
-│   │   └── redis.go
-│   ├── rabbitmq
-│   │   └── rabbitmq.go
+│   │   ├── oracle
+│   │   │   └── oracle.go
+│   │   └── postgres
+│   │       └── postgres.go
 │   ├── firebase
 │   │   └── firebase.go
 │   ├── httpclient
@@ -144,38 +85,48 @@ Welcome to Klystro! This is a modular, scalable, and maintainable backend servic
 │   │   └── interceptors.go
 │   ├── pubnub
 │   │   └── pubnub.go
+│   ├── rabbitmq
+│   │   └── rabbitmq.go
+│   └── redis
+│       └── redis.go
+├── readme.md
 ├── resources
-│   ├── users
-│   │   ├── v1
-│   │   │   ├── controller
-│   │   │   │   └── user_controller.go
-│   │   │   ├── model
-│   │   │   │   └── user.go
-│   │   │   ├── repository
-│   │   │   │   └── user_repository.go
-│   │   │   ├── service
-│   │   │   │   └── user_service.go
-│   │   │   ├── routes
-│   │   │   │   └── user_routes.go
-│   │   │   └── request
-│   │   │       └── user_request.go
 │   ├── posts
-│   │   ├── v1
-│   │   │   └── ...
-├── deployments
-│   ├── k8s
-│   │   ├── deployment.yaml
-│   │   ├── service.yaml
-│   │   └── ingress.yaml
-│   └── docker
-│       └── Dockerfile
+│   │   └── v1
+│   │       ├── controller
+│   │       │   └── post_controller.go
+│   │       ├── model
+│   │       │   └── post.go
+│   │       ├── repository
+│   │       │   └── post_repository.go
+│   │       ├── request
+│   │       │   └── post_request.go
+│   │       ├── routes
+│   │       │   └── post_routes.go
+│   │       └── service
+│   │           └── post_service.go
+│   └── users
+│       └── v1
+│           ├── controller
+│           │   └── user_controller.go
+│           ├── model
+│           │   └── user.go
+│           ├── repository
+│           │   └── user_repository.go
+│           ├── request
+│           │   └── user_request.go
+│           ├── routes
+│           │   └── user_routes.go
+│           └── service
+│               └── user_service.go
 ├── tests
-│   ├── users
-│   │   ├── user_test.go
-│   └── test_helpers.go
-├── go.mod
-└── go.sum -->
-
+│   ├── test_helpers.go
+│   └── users
+│       └── user_test.go
+└── tmp
+    ├── build-errors.log
+    └── main
+```
 
 ## Installation
 
