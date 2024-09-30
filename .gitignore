@@ -16,3 +16,5 @@ vendor/
 tmp/
 .idea
 .env
+cert.pem
+key.pem

@@ -1,0 +1,17 @@
+# .air.toml
+
+[build]
+  cmd = "go build -o tmp/main ./cmd/klystro/main.go"
+  delay = 200
+  bin = "./tmp/main"
+
+[watch]
+  include = ["*.go", "pkg/**/*.go"]
+  exclude = ["tmp/**", "vendor/**", ".git/**"]
+
+[run]
+  cmd = "./tmp/main"
+
+[log]
+  # Show logs in the terminal
+  level = "debug"
