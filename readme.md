@@ -99,6 +99,84 @@ Welcome to Klystro! This is a modular, scalable, and maintainable backend servic
 └── go.sum                       # Go module dependencies
 ```
 
+<!-- /klystro
+├── cmd
+│   ├── klystro
+│   │   └── main.go
+│   ├── migrate
+│   │   └── main.go
+│   └── seed
+│       └── main.go
+├── config
+│   └── config.go
+├── docs
+├── internal
+│   ├── middleware
+│   │   ├── auth.go
+│   │   └── logging.go
+│   ├── enums
+│   │   └── enums.go
+│   ├── exceptions
+│   │   └── exceptions.go
+│   ├── guards
+│   │   └── guards.go
+├── pkg
+│   ├── db
+│   │   ├── mongodb
+│   │   │   └── mongodb.go
+│   │   ├── mysql
+│   │   │   └── mysql.go
+│   │   ├── postgres
+│   │   │   └── postgres.go
+│   │   ├── oracledb
+│   │   │   └── oracledb.go
+│   │   └── influxdb
+│   │       └── influxdb.go
+│   ├── redis
+│   │   └── redis.go
+│   ├── rabbitmq
+│   │   └── rabbitmq.go
+│   ├── firebase
+│   │   └── firebase.go
+│   ├── httpclient
+│   │   └── http_client.go
+│   ├── interceptors
+│   │   └── interceptors.go
+│   ├── pubnub
+│   │   └── pubnub.go
+├── resources
+│   ├── users
+│   │   ├── v1
+│   │   │   ├── controller
+│   │   │   │   └── user_controller.go
+│   │   │   ├── model
+│   │   │   │   └── user.go
+│   │   │   ├── repository
+│   │   │   │   └── user_repository.go
+│   │   │   ├── service
+│   │   │   │   └── user_service.go
+│   │   │   ├── routes
+│   │   │   │   └── user_routes.go
+│   │   │   └── request
+│   │   │       └── user_request.go
+│   ├── posts
+│   │   ├── v1
+│   │   │   └── ...
+├── deployments
+│   ├── k8s
+│   │   ├── deployment.yaml
+│   │   ├── service.yaml
+│   │   └── ingress.yaml
+│   └── docker
+│       └── Dockerfile
+├── tests
+│   ├── users
+│   │   ├── user_test.go
+│   └── test_helpers.go
+├── go.mod
+└── go.sum -->
+
+
 ## Installation
 
 To install the necessary dependencies and set up the project, follow these steps:
