@@ -2,32 +2,31 @@ package mongodb
 
 import (
 	"context"
-	"log"
-	"time"
+	"klystro/pkg/db/config"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectMongoDB(uri string) (*mongo.Client, error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(uri))
+type MongoDB struct {
+	client *mongo.Client
+}
+
+func NewMongoDB(cfg config.DBConfig) *MongoDB {
+	clientOptions := options.Client().ApplyURI(cfg.URI)
+	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		return nil, err
+		panic(err) // Handle error appropriately
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	return &MongoDB{client: client}
+}
 
-	err = client.Connect(ctx)
-	if err != nil {
-		return nil, err
-	}
+func (db *MongoDB) Connect() error {
+	// Check the connection
+	return db.client.Ping(context.Background(), nil)
+}
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Println("Connected to MongoDB!")
-	return client, nil
+func (db *MongoDB) Close() error {
+	return db.client.Disconnect(context.Background())
 }

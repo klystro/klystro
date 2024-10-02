@@ -1,75 +1,97 @@
 package db
 
 import (
-	"context"
+	"fmt"
 	"log"
+	"sync"
 
-	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
-	"go.mongodb.org/mongo-driver/mongo"
-	"gorm.io/driver/mysql"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-
-	"klystro/config"
+	"klystro/pkg/db/config"
+	"klystro/pkg/db/influxdb"
 	"klystro/pkg/db/mongodb"
+	"klystro/pkg/db/mysql"
+	"klystro/pkg/db/oracle"
+	"klystro/pkg/db/postgres"
+)
+
+type Database interface {
+	Connect() error
+	Close() error
+}
+
+type DBType string
+
+const (
+	Mongo    DBType = "MONGODB"
+	MySQL    DBType = "MYSQL"
+	Postgres DBType = "POSTGRES"
+	Influx   DBType = "INFLUXDB"
+	Oracle   DBType = "ORACLEDB"
 )
 
 var (
-	MongoClient  *mongo.Client
-	MySQLDB      *gorm.DB
-	PostgresDB   *gorm.DB
-	OracleDB     *gorm.DB
-	InfluxClient influxdb2.Client
+	dbOnce     sync.Once
+	dbInstance = make(map[DBType]Database)
 )
 
-func InitDatabases() {
+func NewDatabase(dbType DBType) (Database, error) {
+	cfg := config.GetDBConfig(string(dbType))
+
+	if !cfg.ConnectFlag {
+		log.Printf("Connection flag is false for %v; skipping connection.", dbType)
+		return nil, nil
+	}
+
+	// Ensure only one instance is created for each database type
 	var err error
+	dbOnce.Do(func() {
+		switch dbType {
+		case Mongo:
+			dbInstance[Mongo] = mongodb.NewMongoDB(cfg)
+			err = dbInstance[Mongo].Connect()
+		case MySQL:
+			dbInstance[MySQL] = mysql.NewMySQLDB(cfg)
+			err = dbInstance[MySQL].Connect()
+		case Postgres:
+			dbInstance[Postgres] = postgres.NewPostgresDB(cfg)
+			err = dbInstance[Postgres].Connect()
+		case Influx:
+			dbInstance[Influx] = influxdb.NewInfluxDB(cfg)
+			err = dbInstance[Influx].Connect()
+		case Oracle:
+			dbInstance[Oracle] = oracle.NewOracleDB(cfg)
+			err = dbInstance[Oracle].Connect()
+		default:
+			err = fmt.Errorf("unknown database type: %v", dbType)
+		}
+	})
 
-	// MongoDB
-	MongoClient, err = mongodb.ConnectMongoDB(config.GetOrThrow("MONGODB_URI"))
 	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
+		return nil, fmt.Errorf("failed to connect to %v: %v", dbType, err)
 	}
 
-	// MySQL
-	MySQLDB, err = gorm.Open(mysql.Open(config.GetOrThrow("MYSQL_URI")), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Failed to connect to MySQL: %v", err)
-	}
+	return dbInstance[dbType], nil
+}
 
-	// PostgreSQL
-	PostgresDB, err = gorm.Open(postgres.Open(config.GetOrThrow("POSTGRES_URI")), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("Failed to connect to PostgreSQL: %v", err)
-	}
+func InitDatabases() {
+	dbTypes := []DBType{Mongo, MySQL, Postgres, Influx, Oracle}
 
-	// // InfluxDB
-	// InfluxClient, err = influxdb.ConnectInfluxDB(config.GetOrThrow("INFLUXDB_URI"), config.GetOrThrow("INFLUXDB_TOKEN"))
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to InfluxDB: %v", err)
-	// }
+	for _, dbType := range dbTypes {
+		db, err := NewDatabase(dbType) // Declare err here
+		if err != nil {
+			log.Printf("Failed to create %v client: %v", dbType, err)
+		} else if db != nil {
+			log.Printf("Successfully connected to %v", dbType)
+			dbInstance[dbType] = db
+		}
+	}
 }
 
 func CloseDatabases() {
-	if err := MongoClient.Disconnect(context.Background()); err != nil {
-		log.Fatalf("Failed to disconnect MongoDB: %v", err)
+	for _, db := range dbInstance {
+		if db != nil {
+			if err := db.Close(); err != nil {
+				log.Printf("Failed to disconnect: %v", err)
+			}
+		}
 	}
-
-	// Close MySQL
-	if sqlDB, err := MySQLDB.DB(); err == nil {
-		sqlDB.Close()
-	}
-
-	// Close PostgreSQL
-	if sqlDB, err := PostgresDB.DB(); err == nil {
-		sqlDB.Close()
-	}
-
-	// // Close OracleDB
-	// if sqlDB, err := OracleDB.DB(); err == nil {
-	// 	sqlDB.Close()
-	// }
-
-	// InfluxClient.Close()
 }

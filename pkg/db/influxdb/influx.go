@@ -1,21 +1,27 @@
 package influxdb
 
 import (
-	"context"
-	"log"
+	"klystro/pkg/db/config"
 
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-func ConnectInfluxDB(uri, token string) (influxdb2.Client, error) {
-	client := influxdb2.NewClient(uri, token)
+type InfluxDB struct {
+	client influxdb2.Client
+}
 
-	// Use the client to ping InfluxDB
-	_, err := client.Health(context.Background())
-	if err != nil {
-		return nil, err
-	}
+func NewInfluxDB(cfg config.DBConfig) *InfluxDB {
+	client := influxdb2.NewClient(cfg.URI, cfg.Token)
+	return &InfluxDB{client: client}
+}
 
-	log.Println("Connected to InfluxDB!")
-	return client, nil
+func (db *InfluxDB) Connect() error {
+	// InfluxDB's client does not require a specific connection method,
+	// but you can perform a simple write to test the connection if needed.
+	return nil
+}
+
+func (db *InfluxDB) Close() error {
+	db.client.Close()
+	return nil
 }

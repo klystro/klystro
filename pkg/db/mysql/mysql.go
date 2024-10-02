@@ -1,21 +1,33 @@
 package mysql
 
 import (
-	"database/sql"
-	"log"
+	"klystro/pkg/db/config"
 
-	_ "github.com/go-sql-driver/mysql"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
-func ConnectMySQL(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("mysql", dsn)
+type MySQL struct {
+	db *gorm.DB
+}
+
+func NewMySQLDB(cfg config.DBConfig) *MySQL {
+	db, err := gorm.Open(mysql.Open(cfg.URI), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		panic(err) // Handle error appropriately
 	}
-	err = db.Ping()
+
+	return &MySQL{db: db}
+}
+
+func (db *MySQL) Connect() error {
+	return nil
+}
+
+func (db *MySQL) Close() error {
+	sqlDB, err := db.db.DB()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	log.Println("Connected to MySQL!")
-	return db, nil
+	return sqlDB.Close()
 }

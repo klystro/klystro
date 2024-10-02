@@ -1,21 +1,33 @@
 package postgres
 
 import (
-	"database/sql"
-	"log"
+	"klystro/pkg/db/config"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-func ConnectPostgres(dsn string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", dsn)
+type PostgresDB struct {
+	db *gorm.DB
+}
+
+func NewPostgresDB(cfg config.DBConfig) *PostgresDB {
+	db, err := gorm.Open(postgres.Open(cfg.URI), &gorm.Config{})
 	if err != nil {
-		return nil, err
+		panic(err) // Handle error appropriately
 	}
-	err = db.Ping()
+
+	return &PostgresDB{db: db}
+}
+
+func (db *PostgresDB) Connect() error {
+	return nil
+}
+
+func (db *PostgresDB) Close() error {
+	sqlDB, err := db.db.DB()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	log.Println("Connected to PostgreSQL!")
-	return db, nil
+	return sqlDB.Close()
 }

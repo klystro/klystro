@@ -5,14 +5,21 @@ import (
 	"log"
 	"net/http"
 
+	"klystro/config"
 	"klystro/pkg/db"
 
+	"github.com/joho/godotenv"
 	"github.com/quic-go/quic-go/http3"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
+	config.InitConfig()
 	db.InitDatabases()
 	defer db.CloseDatabases()
 
